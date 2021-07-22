@@ -16,15 +16,47 @@ def load_data(
     load csv files, merge using 'id' column, and return dataframe
     """
     messages = pd.read_csv(messages_filepath)
+    
     categories = pd.read_csv(categories_filepath)
+    categories = expand_categories(categories)    
+    
     df = pd.merge(
         left=messages,
         right=categories,
         how='outer',
         on='id'
     )
-    print(df.head())
+
     return df
+
+
+def expand_categories(categories: pd.DataFrame) -> pd.DataFrame:
+    """
+    split and expand strings in categories dataframe, create column names, and change
+    entries into 1's and 0's
+    """
+    categories_expanded = categories.categories.str.split(pat=';', expand=True)
+    
+    # column names taken from first row, as each entry is
+    # of the form 'category-0' or 'category-1'
+    columns = [category[:-2] for category in categories_expanded.iloc[0]]
+    categories_expanded.columns = columns
+    
+    # replace each entry with the 0 or 1 at the end, then convert to int32 type
+    for column in columns:
+        categories_expanded[column] = ( 
+            categories_expanded[column]
+            .astype(str)
+            .str.get(-1)
+            .astype('int32')
+        )
+    
+    # add the primary key to new frame from old frame
+    categories_expanded['id'] = categories.id
+    
+    return categories_expanded
+    
+    
 
 
 def clean_data(df):
