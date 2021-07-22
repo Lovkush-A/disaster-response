@@ -8,8 +8,23 @@ import pandas as pd
 # The ETL script, process_data.py, runs in the terminal without errors. The script takes the file paths of the two datasets and database, cleans the datasets, and stores the clean data into a SQLite database in the specified database file path.
 
 
-def load_data(messages_filepath, categories_filepath):
-    pass
+def load_data(
+    messages_filepath: str,
+    categories_filepath: str
+) -> pd.DataFrame:
+    """
+    load csv files, merge using 'id' column, and return dataframe
+    """
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+    df = pd.merge(
+        left=messages,
+        right=categories,
+        how='outer',
+        on='id'
+    )
+    print(df.head())
+    return df
 
 
 def clean_data(df):
