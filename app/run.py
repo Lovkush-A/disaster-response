@@ -1,3 +1,7 @@
+# The web app, run.py, runs in the terminal without errors. The main page includes at least two visualizations using data from the SQLite database.
+
+# When a user inputs a message into the app, the app returns classification results for all 36 categories.
+
 import json
 import plotly
 import pandas as pd

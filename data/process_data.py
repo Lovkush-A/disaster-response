@@ -1,5 +1,12 @@
 import sys
 
+import numpy as np
+import pandas as pd
+
+# The script successfully follows steps to clean the dataset. It merges the messages and categories datasets, splits the categories column into separate, clearly named columns, converts values to binary, and drops duplicates.
+
+# The ETL script, process_data.py, runs in the terminal without errors. The script takes the file paths of the two datasets and database, cleans the datasets, and stores the clean data into a SQLite database in the specified database file path.
+
 
 def load_data(messages_filepath, categories_filepath):
     pass
