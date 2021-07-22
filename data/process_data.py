@@ -2,8 +2,7 @@ import sys
 
 import numpy as np
 import pandas as pd
-
-# The script successfully follows steps to clean the dataset. It merges the messages and categories datasets, splits the categories column into separate, clearly named columns, converts values to binary, and drops duplicates.
+from sqlalchemy import create_engine
 
 # The ETL script, process_data.py, runs in the terminal without errors. The script takes the file paths of the two datasets and database, cleans the datasets, and stores the clean data into a SQLite database in the specified database file path.
 
@@ -13,7 +12,8 @@ def load_data(
     categories_filepath: str
 ) -> pd.DataFrame:
     """
-    load csv files, merge using 'id' column, and return dataframe
+    load csv files, call expand categories, merge using 'id' column,
+    and return dataframe
     """
     messages = pd.read_csv(messages_filepath)
     
@@ -55,15 +55,25 @@ def expand_categories(categories: pd.DataFrame) -> pd.DataFrame:
     categories_expanded['id'] = categories.id
     
     return categories_expanded
-    
-    
 
 
-def clean_data(df):
-    pass
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    remove duplicate entries
+    """
+    # not providing subset resulted in some duplicates remaining
+    # due to time restrictions, the exact cause of this is not known
+    # but would be investigated if more time was available
+    df = df.drop_duplicates(subset = ['id', 'message'])
+    return df
 
 
 def save_data(df, database_filename):
+    """
+    save dataframe in sql database
+    """
+    engine = create_engine(f'sqlite:///{database_filename}')
+    df.to_sql('disaster', engine, index=False)
     pass  
 
 
