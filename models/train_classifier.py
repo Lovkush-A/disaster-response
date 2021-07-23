@@ -7,11 +7,42 @@
 # The TF-IDF pipeline is only trained with the training data. The f1 score, precision and recall for the test set is outputted for each category.
 
 import sys
+import pandas as pd
+from sqlalchemy import create_engine
 
+# packages for nlp
+import re
+import nltk
+nltk.download('punkt') # needed for word_tokenize
+nltk.download('wordnet') # needed for wordnetlemmatizer
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# imports for ml pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+
+# pickling
+from joblib import dump, load
+from sklearn.metrics import recall_score
 
 def load_data(database_filepath):
-    pass
+    """
+    load dataset and return X dataframe, Y dataframe and
+    category names as list of string
+    """
+    engine = create_engine(f'sqlite:///{database_filepath}')
+    df = pd.read_sql_table('disaster', engine)
 
+    X = df.message
+    Y = df.drop(columns=['id', 'message', 'original', 'genre'])
+    category_names = Y.columns
+    print(category_names)
+    return X, Y, category_names
 
 def tokenize(text):
     pass
