@@ -20,15 +20,14 @@ from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # imports for ml pipeline
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
 
 # pickling
 from joblib import dump, load
-from sklearn.metrics import recall_score
 
 def load_data(database_filepath):
     """
@@ -41,23 +40,48 @@ def load_data(database_filepath):
     X = df.message
     Y = df.drop(columns=['id', 'message', 'original', 'genre'])
     category_names = Y.columns
-    print(category_names)
+
     return X, Y, category_names
 
-def tokenize(text):
-    pass
+def tokenize(text: str):
+    """
+    replace urls, lemmatize and tokenize
+    """
+    # replace urls with 'urlplaceholder'
+    url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    text = re.sub(pattern=url_regex, repl='urlplaceholder', string=text)
+
+    lemmatizer = WordNetLemmatizer()
+    
+    tokens = word_tokenize(text)
+    clean_tokens = [lemmatizer.lemmatize(token).strip() for token in tokens]
+
+    return clean_tokens
 
 
 def build_model():
-    pass
+    pipeline = Pipeline(steps=[
+        ('vectorize', TfidfVectorizer(tokenizer = tokenize, stop_words='english')),
+        ('clf', MultiOutputClassifier(RandomForestClassifier(random_state=0)))
+    ])
+    
+    return pipeline
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    Y_pred = model.predict(X_test)
+
+    for i, column in enumerate(Y_test.columns):
+        print(column)
+        print(classification_report(Y_test.iloc[:,i], Y_pred[:,i]))
+        print('\n\n'+'='*10)
+    
+    return None
 
 
 def save_model(model, model_filepath):
-    pass
+    dump(model, model_filepath)
+    return None
 
 
 def main():
