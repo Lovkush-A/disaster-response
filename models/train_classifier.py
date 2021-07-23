@@ -61,11 +61,19 @@ def tokenize(text: str):
 
 def build_model():
     pipeline = Pipeline(steps=[
-        ('vectorize', TfidfVectorizer(tokenizer = tokenize, stop_words='english')),
+        ('vectorize', TfidfVectorizer(tokenizer = tokenize)),
         ('clf', MultiOutputClassifier(RandomForestClassifier(random_state=0)))
     ])
     
-    return pipeline
+    parameters = {
+        'vectorize__stop_words': (None, 'english'),
+        'vectorize__max_df': (0.75, 1.0),
+        'clf__estimator__n_estimators': (10,)
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters, scoring='recall_weighted')
+    
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
