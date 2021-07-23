@@ -51,6 +51,9 @@ def expand_categories(categories: pd.DataFrame) -> pd.DataFrame:
             .astype('int32')
         )
     
+    # while modelling, discovered that some entries are 2. replace them with 1
+    categories_expanded = categories_expanded.replace(to_replace = 2, value = 1)
+    
     # add the primary key to new frame from old frame
     categories_expanded['id'] = categories.id
     
@@ -73,7 +76,7 @@ def save_data(df, database_filename):
     save dataframe in sql database
     """
     engine = create_engine(f'sqlite:///{database_filename}')
-    df.to_sql('disaster', engine, index=False)
+    df.to_sql('disaster', engine, if_exists='replace', index=False)
     pass  
 
 
