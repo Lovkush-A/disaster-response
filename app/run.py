@@ -62,13 +62,34 @@ model = load("../models/classifier.pkl")
 @app.route('/index')
 def index():
     
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # extract data needed for udacity example
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+    # extract data for category plot
+    category_percentages = (
+        df
+        .drop(columns=['id', 'message', 'original', 'genre'])
+        .mean()
+        .sort_values(ascending=False)
+    )
+    category_names = category_percentages.index
+    
+    # extract data for word frequencies
+    tokenized_messages = [tokenize(text) for text in df.message]
+    
+    word_count = {}
+    for message in tokenized_messages:
+        for token in message:
+            if token not in word_count:
+                word_count[token] = 0
+            word_count[token] += 1
+    
+    word_count_sorted = sorted(word_count.items(), key=lambda item: item[1], reverse=True)
+    
+    top_words = [word for word,_ in word_count_sorted[0:50]]
+    top_words_count = [count for _,count in word_count_sorted[0:50]]
+    
     graphs = [
         {
             'data': [
@@ -85,6 +106,42 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=category_names,
+                    y=category_percentages
+                )
+            ],
+
+            'layout': {
+                'title': 'Percentage of total messages in each category',
+                'yaxis': {
+                    'title': "% of all messages in that category"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=top_words,
+                    y=top_words_count
+                )
+            ],
+
+            'layout': {
+                'title': 'Most frequent "words" in the dataset',
+                'yaxis': {
+                    'title': "Number of occurences of the word"
+                },
+                'xaxis': {
+                    'title': "Word"
                 }
             }
         }
